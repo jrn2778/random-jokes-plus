@@ -1,4 +1,6 @@
-const jokes = [
+const _ = require('underscore');
+
+let jokes = [
   { q: 'What do you call a very small valentine?', a: 'A valen-tiny!' },
   { q: 'What did the dog say when he rubbed his tail on the sandpaper?', a: 'Ruff, Ruff!' },
   { q: "Why don't sharks like to eat clowns?", a: 'Because they taste funny!' },
@@ -17,14 +19,26 @@ const jokes = [
   { q: 'What do you get when you cross a snowman with a vampire?', a: 'Frostbite' },
 ];
 
-const getRandomJoke = () => {
-  const randIndex = Math.floor(Math.random() * jokes.length);
-  return JSON.stringify(jokes[randIndex]);
+const getRandomJoke = (enteredLimit = 1) => {
+  // Make sure limit is within bounds (1 - jokes length)
+  let limit = Math.floor(Number(enteredLimit));
+  limit = !limit ? 1 : limit;
+  limit = limit < 1 ? 1 : limit;
+  limit = limit > jokes.length ? jokes.length : limit;
+
+  // Shuffle the jokes and grab the first of amount 'limit'
+  jokes = _.shuffle(jokes);
+  const chosenJokes = [];
+  for (let i = 0; i < limit; i++) {
+    chosenJokes.push(jokes[i]);
+  }
+
+  return JSON.stringify(chosenJokes);
 };
 
-const getRandomJokeResponse = (request, response) => {
+const getRandomJokeResponse = (request, response, params) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
-  response.write(getRandomJoke());
+  response.write(getRandomJoke(params.limit));
   response.end();
 };
 
