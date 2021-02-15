@@ -19,7 +19,14 @@ let jokes = [
   { q: 'What do you get when you cross a snowman with a vampire?', a: 'Frostbite' },
 ];
 
-const getRandomJoke = (enteredLimit = 1) => {
+// Gets a single joke
+const getRandomJoke = () => {
+  const randIndex = Math.floor(Math.random() * jokes.length);
+  return JSON.stringify(jokes[randIndex]);
+};
+
+// Gets one or more jokes
+const getRandomJokes = (enteredLimit = 1) => {
   // Make sure limit is within bounds (1 - jokes length)
   let limit = Math.floor(Number(enteredLimit));
   limit = !limit ? 1 : limit;
@@ -36,12 +43,21 @@ const getRandomJoke = (enteredLimit = 1) => {
   return JSON.stringify(chosenJokes);
 };
 
-const getRandomJokeResponse = (request, response, params) => {
+// Response for /random-joke (one joke)
+const getRandomJokeResponse = (request, response) => {
   response.writeHead(200, { 'Content-Type': 'application/json' });
-  response.write(getRandomJoke(params.limit));
+  response.write(getRandomJoke());
+  response.end();
+};
+
+// Response for /random-jokes (one or more jokes)
+const getRandomJokesResponse = (request, response, params) => {
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  response.write(getRandomJokes(params.limit));
   response.end();
 };
 
 module.exports = {
   getRandomJokeResponse,
+  getRandomJokesResponse,
 };
