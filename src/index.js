@@ -9,6 +9,7 @@ const port = process.env.PORT || process.env.NODE_PORT || 3000;
 const urlStruct = {
   '/random-joke': jsonHandler.getRandomJokeResponse,
   '/random-jokes': jsonHandler.getRandomJokesResponse,
+  '/default-styles.css': htmlHandler.getDefaultStylesResponse,
   notFound: htmlHandler.get404Response,
 };
 
@@ -18,15 +19,17 @@ const onRequest = (request, response) => {
   const { pathname } = parsedUrl;
   const params = query.parse(parsedUrl.query);
 
+  const httpMethod = request.method;
+
   // Save the accept headers
   let acceptedTypes = request.headers.accept && request.headers.accept.split(',');
   acceptedTypes = acceptedTypes || [];
 
   // Run appropriate function based on path
   if (urlStruct[pathname]) {
-    urlStruct[pathname](request, response, params, acceptedTypes);
+    urlStruct[pathname](request, response, params, acceptedTypes, httpMethod);
   } else {
-    urlStruct.notFound(request, response, params, acceptedTypes);
+    urlStruct.notFound(request, response, params, acceptedTypes, httpMethod);
   }
 };
 

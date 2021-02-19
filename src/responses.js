@@ -25,6 +25,10 @@ const jokeAsXML = (joke) => `<joke>
     <a>${joke.a}</a>
   </joke>`;
 
+// Source: https://stackoverflow.com/questions/2219526/how-many-bytes-in-a-javascript-string/29955838
+// Refactored to an arrow function by ACJ
+const getBinarySize = (string) => Buffer.byteLength(string, 'utf8');
+
 // Gets a single joke
 const getRandomJoke = (isXML = false) => {
   const randIndex = Math.floor(Math.random() * jokes.length);
@@ -64,22 +68,30 @@ const getRandomJokes = (enteredLimit = 1, isXML = false) => {
 };
 
 // Response for /random-joke (one joke)
-const getRandomJokeResponse = (request, response, params, acceptedTypes) => {
+const getRandomJokeResponse = (request, response, params, acceptedTypes, httpMethod) => {
   const isXML = acceptedTypes.includes('text/xml');
   const contentType = isXML ? 'text/xml' : 'application/json';
+  const content = getRandomJoke(isXML);
 
-  response.writeHead(200, { 'Content-Type': contentType });
-  response.write(getRandomJoke(isXML));
+  const headers = { 'Content-Type': contentType };
+  if (httpMethod === 'HEAD') headers['Content-Length'] = getBinarySize(content);
+
+  response.writeHead(200, headers);
+  if (httpMethod !== 'HEAD') response.write(content);
   response.end();
 };
 
 // Response for /random-jokes (one or more jokes)
-const getRandomJokesResponse = (request, response, params, acceptedTypes) => {
+const getRandomJokesResponse = (request, response, params, acceptedTypes, httpMethod) => {
   const isXML = acceptedTypes.includes('text/xml');
   const contentType = isXML ? 'text/xml' : 'application/json';
+  const content = getRandomJokes(params.limit, isXML);
 
-  response.writeHead(200, { 'Content-Type': contentType });
-  response.write(getRandomJokes(params.limit, isXML));
+  const headers = { 'Content-Type': contentType };
+  if (httpMethod === 'HEAD') headers['Content-Length'] = getBinarySize(content);
+
+  response.writeHead(200, headers);
+  if (httpMethod !== 'HEAD') response.write(content);
   response.end();
 };
 
