@@ -19,14 +19,23 @@ let jokes = [
   { q: 'What do you get when you cross a snowman with a vampire?', a: 'Frostbite' },
 ];
 
+// Converts a joke to XML
+const jokeAsXML = (joke) => `<joke>
+    <q>${joke.q}</q>
+    <a>${joke.a}</a>
+  </joke>`;
+
 // Gets a single joke
-const getRandomJoke = () => {
+const getRandomJoke = (isXML = false) => {
   const randIndex = Math.floor(Math.random() * jokes.length);
+
+  // Check for XML or JSON version
+  if (isXML) return `<?xml version="1.0" ?>\n${jokeAsXML(jokes[randIndex])}`;
   return JSON.stringify(jokes[randIndex]);
 };
 
 // Gets one or more jokes
-const getRandomJokes = (enteredLimit = 1) => {
+const getRandomJokes = (enteredLimit = 1, isXML = false) => {
   // Make sure limit is within bounds (1 - jokes length)
   let limit = Math.floor(Number(enteredLimit));
   limit = !limit ? 1 : limit;
@@ -40,20 +49,37 @@ const getRandomJokes = (enteredLimit = 1) => {
     chosenJokes.push(jokes[i]);
   }
 
-  return JSON.stringify(chosenJokes);
+  // Check for XML or JSON
+  if (isXML) {
+    let xml = '<?xml version="1.0" ?>\n<jokes>';
+
+    chosenJokes.forEach((joke) => {
+      xml += jokeAsXML(joke);
+    });
+
+    xml += '</jokes>';
+
+    return xml;
+  } return JSON.stringify(chosenJokes);
 };
 
 // Response for /random-joke (one joke)
-const getRandomJokeResponse = (request, response) => {
-  response.writeHead(200, { 'Content-Type': 'application/json' });
-  response.write(getRandomJoke());
+const getRandomJokeResponse = (request, response, params, acceptedTypes) => {
+  const isXML = acceptedTypes.includes('text/xml');
+  const contentType = isXML ? 'text/xml' : 'application/json';
+
+  response.writeHead(200, { 'Content-Type': contentType });
+  response.write(getRandomJoke(isXML));
   response.end();
 };
 
 // Response for /random-jokes (one or more jokes)
-const getRandomJokesResponse = (request, response, params) => {
-  response.writeHead(200, { 'Content-Type': 'application/json' });
-  response.write(getRandomJokes(params.limit));
+const getRandomJokesResponse = (request, response, params, acceptedTypes) => {
+  const isXML = acceptedTypes.includes('text/xml');
+  const contentType = isXML ? 'text/xml' : 'application/json';
+
+  response.writeHead(200, { 'Content-Type': contentType });
+  response.write(getRandomJokes(params.limit, isXML));
   response.end();
 };
 
