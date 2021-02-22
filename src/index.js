@@ -10,6 +10,7 @@ const urlStruct = {
   '/random-joke': jsonHandler.getRandomJokeResponse,
   '/random-jokes': jsonHandler.getRandomJokesResponse,
   '/default-styles.css': htmlHandler.getDefaultStylesResponse,
+  '/joke-client.html': htmlHandler.getJokeClient,
   notFound: htmlHandler.get404Response,
 };
 
